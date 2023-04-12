@@ -152,3 +152,11 @@ if($resourceTitle === 'articles' && $isItemOperation && $httpMethod==='DELETE'){
     }
     http_response_code(204);
 }
+
+// collection d'user
+if($uri==='users' && $isItemOperation && $httpMethod==='GET'){
+    $stmt = $pdo->prepare("SELECT * FROM users");
+    $users = $stmt->execute();
+    echo json_encode($users);
+    exit;
+}
