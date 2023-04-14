@@ -6,11 +6,20 @@ require_once __DIR__. '/../vendor/autoload.php';
 
 use App\config\DbInitializer;
 use App\config\ExceptionHandlerInitializer;
+use App\controllers\articlesApiCrudController;
+use App\controllers\anthorsApiCrudController;
+use App\Exception\UnprocessableContentException;
 use Symfony\Component\Dotenv\Dotenv;
+use App\http\ResponseCode;
 
 header('Content-Type: application/json; charset=utf-8');
 
-
+set_error_handler(function () {
+    http_response_code(ResponseCode::INTERNAL_SERVER_ERROR);
+    echo json_encode([
+        'error' => 'Une erreur est survenue'
+    ]);
+});
 
 // charge les variables d'environnement
 $dotenv = new Dotenv();               //   这里是dotenv后面直接ctrl+espace， 然后回车键就可以添加上面use Symfony\Component\Dotenv\Dotenv;
@@ -22,141 +31,29 @@ $pdo = DbInitializer::getPdoInstance();
 
 $uri = $_SERVER['REQUEST_URI'];
 $httpMethod = $_SERVER['REQUEST_METHOD'];
-
-//Collection de produits
-if($uri === '/articles' && $httpMethod === 'GET'){
-    $stmt = $pdo->query("SELECT * FROM articles");
-    $articles = $stmt->fetchAll();
-    echo json_encode($articles);
-}
-
-//Création de l'article
-if($uri === '/articles' && $httpMethod === 'POST'){
-   $data = json_decode(file_get_contents('php://input'), true);
-   
-   if(!isset($data['title']) || !isset($data['content'])){
-        //gestion d'erreur
-        http_response_code(422);
-        echo json_encode([
-            'error' => 'Title and content are required'
-        ]);
-          exit;
-        }
-
-        $query= "INSERT INTO articles VALUES (null, :title, :content, :user_id, :createTime)";
-        $stmt = $pdo->prepare($query);
-        $stmt ->execute([
-            ':title' => $data['title'],
-            ':content' => $data['content'],
-            ':user_id' => $data['user_id'],
-            ':createTime' => date('Y-m-d H:i:s')
-        ]);
-        http_response_code(201);
-        $insertedArticleId = $pdo ->lastInsertId();
-        echo json_encode([
-            'uri' => '/articles/' . $insertedArticleId
-        ]);
-}
+// const RESOURCES = ['articles'];
+// const RESOURCES = ['anthors'];
 
 //Ressource seule, type /article/{id}
 //explode:
 // /articles => ['', 'articles']
 // /article/1 => ['', 'article', '1']
-// /articles/coucou => ['', 'articles', 'coucou']
+// // /articles/coucou => ['', 'articles', 'coucou']
 
-$uriParts = explode('/', $uri);
-$isItemOperation = count($uriParts) === 3;
-
-//Identifie si on est sur une opération sur un élément
-if(!$isItemOperation){
-    http_response_code(404);
+// $uriParts = explode('/', $uri);
+// $isItemOperation = count($uriParts) === 3;
+// $articlesCrud = new ArticlesCrud($pdo);
+if(str_contains($uri, "/articles")){
+    $controller = new articlesApiCrudController($pdo, $uri, $httpMethod);
+    $controller->processRequest();
+} else if (str_contains($uri, "/anthors")) {
+    $controller = new anthorsApiCrudController($pdo, $uri, $httpMethod);
+    $controller->processRequest();
+} else {
+    http_response_code(ResponseCode::BAD_REQUEST);
     echo json_encode([
-        'error' => 'Road Not found'
+        'error' => "An error occured",
+        'code' => 400,
+        'message' => "can't find the resource"
     ]);
-    exit;
-}
-
-//Identifie si l'ID est valide (pas s'il existe en bdd)
-$resourceTitle = $uriParts[1];
-$id = intval($uriParts[2]);
-if($id===0){
-    http_response_code(400);
-    echo json_encode([
-        'error' => 'ID not found'
-    ]);
-    exit;
-}
-
-if($resourceTitle === 'articles' && $isItemOperation && $httpMethod==='GET'){
-    $query = "SELECT * FROM articles WHERE id = :id";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([
-        ':id' => $id
-    ]);
-    $articles = $stmt->fetch();
-
-    if($articles === false){
-        http_response_code(404);
-        echo json_encode([
-            'error' => 'Article not found'
-        ]);
-        exit;
-    }
-
-    echo json_encode($articles);
-}
-
-// modification du élément
-if($resourceTitle === 'articles' && $isItemOperation && $httpMethod==='PUT'){
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    if(!isset($data['title']) ||!isset($data['content'])){
-        //gestion d'erreur
-        http_response_code(422);
-        echo json_encode([
-            'error' => 'Title and content are required'
-        ]);
-          exit;
-    }
-    $query = "UPDATE articles SET title = :title, content = :content, createTime = :createTime WHERE id = :id";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([
-        ':id' => $id,
-        ':title' => $data['title'],
-        ':content' => $data['content'],
-        ':createTime' => date('Y-m-d H:i:s')
-    ]);
-    if($stmt->rowCount() === 0){
-        http_response_code(404);
-        echo json_encode([
-            'error' => 'Article not found'
-        ]);
-        exit;
-    }
-    http_response_code(204);
-}
-
-//deletion du élément
-if($resourceTitle === 'articles' && $isItemOperation && $httpMethod==='DELETE'){
-    $query = "DELETE FROM articles WHERE id = :id";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([
-        ':id' => $id
-    ]);
-    if($stmt->rowCount() === 0){
-        http_response_code(404);
-        echo json_encode([
-            'error' => 'Article not found'
-        ]);
-        exit;
-    }
-    http_response_code(204);
-}
-
-// collection d'user
-if($uri==='users' && $isItemOperation && $httpMethod==='GET'){
-    $stmt = $pdo->prepare("SELECT * FROM users");
-    $users = $stmt->execute();
-    echo json_encode($users);
-    exit;
 }

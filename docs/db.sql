@@ -1,4 +1,4 @@
-CREATE TABLE users(
+CREATE TABLE authors(
         id  INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
         name  VARCHAR (50) NOT NULL ,
         password VARCHAR(50) NOT NULL,
@@ -11,15 +11,15 @@ CREATE TABLE articles(
         content Text(500) NOT NULL ,
         user_id int (11) NOT NULL,
         createTime timestamp NOT NULL,
-	    FOREIGN KEY (user_id) REFERENCES users(id)     
+	    FOREIGN KEY (author_id) REFERENCES authors(id)     
 )ENGINE=InnoDB;
 
-INSERT INTO users (id, name, password, registerTime) VALUES 
+INSERT INTO authors (id, name, password, registerTime) VALUES 
 	(1, 'claire', '123456', '2022-04-11'),
     (2, 'zhou', '456789', '2022-05-23'),
     (3, 'zhao', '678900', '2021-06-28');
 
-INSERT INTO articles (id, title, content, createTime, user_id) VALUES 
+INSERT INTO articles (id, title, content, createTime, author_id) VALUES 
 	(1, ' How To Change Your Life For The Better', 
     'One of the best ways to get new readers is to identify and solve a problem with trigger words.', '2023-12-16', '2'),
     (2, '6 Instant Confidence Boosters', 
