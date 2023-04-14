@@ -7,7 +7,7 @@ require_once __DIR__. '/../vendor/autoload.php';
 use App\config\DbInitializer;
 use App\config\ExceptionHandlerInitializer;
 use App\controllers\articlesApiCrudController;
-use App\controllers\anthorsApiCrudController;
+use App\controllers\authorsApiCrudController;
 use App\Exception\UnprocessableContentException;
 use Symfony\Component\Dotenv\Dotenv;
 use App\http\ResponseCode;
@@ -32,7 +32,7 @@ $pdo = DbInitializer::getPdoInstance();
 $uri = $_SERVER['REQUEST_URI'];
 $httpMethod = $_SERVER['REQUEST_METHOD'];
 // const RESOURCES = ['articles'];
-// const RESOURCES = ['anthors'];
+// const RESOURCES = ['authors'];
 
 //Ressource seule, type /article/{id}
 //explode:
@@ -46,8 +46,8 @@ $httpMethod = $_SERVER['REQUEST_METHOD'];
 if(str_contains($uri, "/articles")){
     $controller = new articlesApiCrudController($pdo, $uri, $httpMethod);
     $controller->processRequest();
-} else if (str_contains($uri, "/anthors")) {
-    $controller = new anthorsApiCrudController($pdo, $uri, $httpMethod);
+} else if (str_contains($uri, "/authors")) {
+    $controller = new authorsApiCrudController($pdo, $uri, $httpMethod);
     $controller->processRequest();
 } else {
     http_response_code(ResponseCode::BAD_REQUEST);

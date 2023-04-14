@@ -47,9 +47,9 @@ class articlesApiCrudController extends ApiCrudController
    
     public function resourceOperation(int $id): void
     {
-        echo "resourceOperation\n";
+        // echo "resourceOperation\n";
         $article = $this->Crud->read($id);
-        echo "article";
+        // echo "article";
         if ( ! $article) {
             http_response_code(404);
             echo json_encode(["message" => "Article not found"]);
@@ -62,7 +62,7 @@ class articlesApiCrudController extends ApiCrudController
                 break;
                 
             case "PUT":
-                echo "put";
+                // echo "put";
                 $data = (array) json_decode(file_get_contents("php://input"), true);
                 
                 $errors = $this->getValidationErrors($data, false);
@@ -98,7 +98,7 @@ class articlesApiCrudController extends ApiCrudController
     
     public function collectionOperation(): void
     {
-        echo $this -> httpMethod."\n";
+        // echo $this -> httpMethod."\n";
         switch ($this -> httpMethod) {
             case "GET":
                 echo json_encode($this->Crud->readAll());
@@ -121,7 +121,7 @@ class articlesApiCrudController extends ApiCrudController
                     echo json_encode(["errors" => $errors]);
                     break;
                 }
-                echo "5\n";
+                // echo "5\n";
                 $id = $this->Crud->create($data);
                 echo "6\n";
                 http_response_code(ResponseCode::CREATED);
@@ -129,7 +129,7 @@ class articlesApiCrudController extends ApiCrudController
                     "message" => "Articles created",
                     "id" => $id
                 ]);
-                echo "7\n";
+                // echo "7\n";
                 break;
             
             default:

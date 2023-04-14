@@ -2,7 +2,7 @@
 namespace App\controllers;
 
 use App\Exception\UnprocessableContentException;
-use App\cruds\ArticlesCrud;
+use App\cruds\AuthorsCrud;
 use App\controllers\ApiCrudController;
 use App\http\ResponseCode;
 use Exception;
@@ -12,11 +12,11 @@ class authorsApiCrudController extends ApiCrudController
   
     public function processRequest(): void
     {
-        echo "anthorsApiCrudController processRequest";
+        echo "authorsApiCrudController processRequest";
 
         $this -> Crud = new AuthorsCrud($this->pdo);
 
-        if ($this ->uri === "/anthors") {
+        if ($this ->uri === "/authors") {
             try {
             $this->processCollectionRequest();
             $this->collectionOperation();
@@ -48,17 +48,17 @@ class authorsApiCrudController extends ApiCrudController
    
     public function resourceOperation(int $id): void
     {
-        $article = $this->Crud->read($id);
+        $author = $this->Crud->read($id);
         
-        if ( ! $article) {
-            http_response_code(404);
-            echo json_encode(["message" => "Article not found"]);
+        if ( ! $author) {
+            http_response_code(ResponseCode::NOT_FOUND);
+            echo json_encode(["message" => "Author not found"]);
             return;
         }
         
         switch ($this -> httpMethod) {
             case "GET":
-                echo json_encode($article);
+                echo json_encode($author);
                 break;
                 
             case "put":
@@ -67,30 +67,30 @@ class authorsApiCrudController extends ApiCrudController
                 $errors = $this->getValidationErrors($data, false);
                 
                 if ( ! empty($errors)) {
-                    http_response_code(422);
+                    http_response_code(ResponseCode::UNPROCESSABLE_CONTENT);
                     echo json_encode(["errors" => $errors]);
                     break;
                 }
                 
                 $rows = $this->Crud->update($id, $data);
-                
+                http_response_code(ResponseCode::NO_CONTENT);
                 echo json_encode([
-                    "message" => "articles $id updated",
+                    "message" => "authors $id updated",
                     "rows" => $rows
                 ]);
                 break;
                 
             case "DELETE":
                 $rows = $this->Crud->delete($id);
-                
+               
                 echo json_encode([
-                    "message" => "article $id deleted",
+                    "message" => "authors $id deleted",
                     "rows" => $rows
                 ]);
                 break;
                 
             default:
-                http_response_code(405);
+                http_response_code(ResponseCode::METHOD_NOT_ALLOWED);
                 header("Allow: GET, PUT, DELETE");
         }
     }
@@ -108,22 +108,22 @@ class authorsApiCrudController extends ApiCrudController
                 $errors = $this->getValidationErrors($data);
                 
                 if ( ! empty($errors)) {
-                    http_response_code(422);
+                    http_response_code(ResponseCode::UNPROCESSABLE_CONTENT);
                     echo json_encode(["errors" => $errors]);
                     break;
                 }
                 
                 $id = $this->Crud->create($data);
                 
-                http_response_code(201);
+                http_response_code(ResponseCode::CREATED);
                 echo json_encode([
-                    "message" => "Product created",
+                    "message" => "Author created",
                     "id" => $id
                 ]);
                 break;
             
             default:
-                http_response_code(405);
+                http_response_code(ResponseCode::METHOD_NOT_ALLOWED);
                 header("Allow: GET, POST");
         }
     }

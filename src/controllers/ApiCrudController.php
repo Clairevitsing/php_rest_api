@@ -4,7 +4,6 @@ namespace App\controllers;
 use App\cruds\ApiCrud;
 use App\Exception\MethodNotAllowed;
 use App\Exception\NotFound;
-use App\http\ResponseCode;
 use PDO;
 
 abstract class ApiCrudController
@@ -25,14 +24,14 @@ abstract class ApiCrudController
     
    
         /**
-     * Check if the used method is acceptable for a collection operation. Pass without doing anything if it's good, throw an Exception if it's not.
+     * 檢查使用的方法是否適合收集數據。 如果可以就通過，如果不行，則拋出異常。
      *
      * @return void
      * @throws Exception
      */
     protected function processCollectionRequest(): void
     {
-        echo "processCollectionRequest\n";
+        // echo "processCollectionRequest\n";
 
         if (!in_array($this->httpMethod, self::ACCEPTED_COLLECTION_METHODS)) {
             throw new MethodNotAllowed("Please choose an accepted method for a collection request : " . implode(" - ", self::ACCEPTED_COLLECTION_METHODS));
@@ -40,14 +39,14 @@ abstract class ApiCrudController
     }
 
     /**
-     * Check if the used method is acceptable for a resource operation. Pass without doing anything if it's good, throw an Exception if it's not. 
+     * 檢查使用的方法是否適合資源收集。 如果可以就通過，如果不行，則拋出異常。
      *
      * @return void
      * @throws Exception
      */
     protected function processResourceRequest(): void
     {
-        echo "processResourceRequest\n";
+        // echo "processResourceRequest\n";
 
         if (!in_array($this->httpMethod, self::ACCEPTED_RESOURCE_METHODS)) {
             throw new MethodNotAllowed("accepted method: " . implode(" - ", self::ACCEPTED_RESOURCE_METHODS));
@@ -55,7 +54,7 @@ abstract class ApiCrudController
     }
 
     /**
-     * Check if the id is in the database. Pass without doing anything if it's good, throw an Exception if it's not
+     * 確認id是否存在數據庫中。 如果在就通過，如果不在就拋出異常
      *
      * @param integer $id
      * @return void
